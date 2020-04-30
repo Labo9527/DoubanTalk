@@ -15,6 +15,7 @@ class Spider(object):
         # self.driver = webdriver.Chrome()
         self.driver = webdriver.Chrome(chrome_options=chrome_options)
         self.url = 'https://space.bilibili.com/927587/video'
+        # self.url = 'https://space.bilibili.com/927587/video?tid=0&page=32&keyword=&order=pubdate'
         self.data = {
             'titles': [],
             'play_number': [],
@@ -41,10 +42,12 @@ class Spider(object):
 
         while True:
             flag = False
-            for i in range(len(elements)):
+            counts = int((len(elements) - 1) / 2) + 1
+            for i in range(counts):
                 if i == 0:
                     continue
                 self.number = self.number + 1
+                print('标题', elements[i].get_attribute('textContent'))
                 self.data['titles'].append(elements[i].get_attribute('textContent'))
                 self.data['url'].append(elements[i].get_attribute('href'))
                 self.data['play_number'].append(plays[i - 1].get_attribute('textContent'))
@@ -54,7 +57,10 @@ class Spider(object):
                     time.sleep(1)
                     if '点赞数0' not in self.driver.find_element_by_class_name('like').get_attribute('title'):
                         break
-                print(self.driver.find_element_by_class_name('like').get_attribute('title').replace('点赞数', ''))
+                print('点赞数', self.driver.find_element_by_class_name('like').get_attribute('title').replace('点赞数', ''))
+                print('投币数', self.driver.find_element_by_class_name('coin').get_attribute('textContent'))
+                print('收藏数', self.driver.find_element_by_class_name('collect').get_attribute('textContent'))
+                print('分享数', self.driver.find_element_by_class_name('share').get_attribute('textContent')[:5])
                 self.data['vote'].append(
                     self.driver.find_element_by_class_name('like').get_attribute('title').replace('点赞数', ''))
                 self.data['coin'].append(self.driver.find_element_by_class_name('coin').get_attribute('textContent'))
@@ -68,10 +74,10 @@ class Spider(object):
                 times = self.driver.find_elements_by_class_name('time')
 
                 print("第", self.page, '页，第', self.number, '个视频，', '用时', time.time() - self.start_time, '秒')
-
+                print('-' * 10)
             try:
                 self.driver.find_element_by_link_text('下一页').click()
-                time.sleep(1)
+                time.sleep(5)
                 elements = self.driver.find_elements_by_class_name('title')
                 plays = self.driver.find_elements_by_class_name('play')
                 times = self.driver.find_elements_by_class_name('time')
